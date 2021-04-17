@@ -104,15 +104,15 @@ server.on('message', function(topic, message) {
     switch(topic){
         // tópicos do cardapio
         case addItem:
-            const item = JSON.parse(message);
+            var item = JSON.parse(message);
             itensCardapio.push(item);
             break;
         case listarCardapio:
             server.publish(resultListarCardapio, JSON.stringify(itensCardapio));
             break;
         case buscarItem:
-            const indice = parseInt(message);
-            const item = itensCardapio[indice];
+            var indice = parseInt(message);
+            item = itensCardapio[indice];
             server.publish(resultBuscarItem, JSON.stringify(item));
             break;
         case excluirItem:
@@ -120,8 +120,12 @@ server.on('message', function(topic, message) {
 
         // tópicos dos pedidos
         case addPedido:
+            item = JSON.parse(message);
+            itensPedidos.push(item);
+            server.publish(resultAddPedido, JSON.stringify(item));
             break;
         case listarPedidos:
+            server.publish(resultListarPedido, JSON.stringify(itensPedidos));
             break;
         case excluirPedido:
             break;

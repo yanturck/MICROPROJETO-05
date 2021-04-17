@@ -34,27 +34,48 @@ const menuADM = "Estamos no menu do Administador,\nagora vc pode adicionar [A+No
 // variavel responsavel para ver se é ADMIN
 var admin = false;
 
-console.log(menu);
-rl.addListener('line', line => {
-    const aux = line.toUpperCase();
-    const comando = aux[0];
+client.on('connect', function(){
+    console.log(menu);
+    rl.addListener('line', line => {
+        const aux = line.toUpperCase();
+        const comando = aux[0];
 
-    client.on('connect', function(){
         if (admin === false) {
             switch (comando) {
                 case 'M': // visualizar menu
                     console.log(menu);
                     break;
                 case 'V': // visualizar cardapio
-                    client.publish(listarCardapio, '');
+                    client.subscribe(resultListarCardapio, function(err){
+                        if (!err) {
+                            //console.log('Subscrito no tópico "' + resultListarCardapio + '" com sucesso!');
+                            client.publish(listarCardapio, '');
+                        }
+                    });
                     break;
                 case 'P': // visualizar pedidos
+                    client.subscribe(resultListarPedido, function (err) {
+                        if (!err) {
+                            //console.log('Subscrito no tópico "' + resultListarCardapio + '" com sucesso!');
+                            client.publish(listarPedidos, '');
+                        }
+                    });
                     break;
                 case 'A': // realizar pedido [A + Indice do Item]
+                    client.subscribe(resultAddItem, function (err) {
+                        if (!err) {
+                            const posicao = parseInt(aux.slice(1));
+                            client.publish()
+                        }
+                    });
                     break;
                 case 'E': // excluir pedido [E + Indice do Pedido]
                     break;
                 case 'B': // busca item [B + Indice do Item]
+                    var indice = parseInt(aux.slice(1));
+                    client.subscribe(resultBuscarItem, function (err) {
+                        client.publish(buscarItem, indice);
+                    });
                     break;
                 case 'F': // finalizar
                     break;
@@ -81,13 +102,33 @@ rl.addListener('line', line => {
             }
         }
     });
+});
 
     client.on('message', function (topic, message) {
         switch (topic) {
             case resultListarCardapio:
-                const cardapio = JSON.parse(message.toString());
-                console.log(cardapio);
+                var cardapio = '';
+                var aux = JSON.parse(message.toString());
+                for (var i = 0; i < aux.length; i++){
+                    var item = (i+1) + '.' + aux[i].nome + ' - R$ ' + aux[i].preco + '\n';
+                    cardapio = cardapio + item;
+                }
+                console.log("\n>>>> O cardapio do dia é:\n" + cardapio + '\n');
+                break;
+            case resultListarPedido:
+                var pedidos = '';
+                var total = 0;
+                var aux = JSON.parse(message.toString());
+                for (var i = 0; i < aux.length; i++){
+                    var item = (i+1) + '.' + aux[i].nome + ' - R$ ' + aux[i].preco + '\n';
+                    pedidos = cardapio + item;
+                    total = total + aux[i].preco;
+                }
+                console.log('\n>>>> Os seus pedidos são:\n' +  pedidos + '\nValor total: ' + total + '\n');
+                break;
+            case resultBuscarItem:
+                var pedido = JSON.parse(message.toString());
+                console.log('\nItem encontrado: ' + pedido.nome + ' no valor de R$ ' + pedido.preco + '\n');
                 break;
         }
     });
-});
