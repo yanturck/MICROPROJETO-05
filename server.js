@@ -20,9 +20,13 @@ const finalizar = 'finalizar';
 const resultAddPedido = 'result-add-pedido';
 const resultListarPedido = 'result-listar-pedido';
 const resultExcluirPedido = 'result-excluir-pedido';
+const resultFinalizar = 'result-finalizar';
 
 const ADMIN = 'admin';
+const resultAdmin = 'result-admin';
+
 const cancelar = 'cancelar';
+const resultCancelar = 'result-cancelar';
 
 var itensCardapio = [{nome: 'PIZZA', preco: 25.00},
                     {nome: 'BROTINHO', preco: 10.00},
@@ -111,7 +115,7 @@ server.on('message', function(topic, message) {
             server.publish(resultListarCardapio, JSON.stringify(itensCardapio));
             break;
         case buscarItem:
-            var indice = parseInt(message);
+            var indice = parseInt(message)-1;
             item = itensCardapio[indice];
             server.publish(resultBuscarItem, JSON.stringify(item));
             break;
@@ -120,19 +124,27 @@ server.on('message', function(topic, message) {
 
         // tópicos dos pedidos
         case addPedido:
-            item = JSON.parse(message);
-            itensPedidos.push(item);
-            server.publish(resultAddPedido, JSON.stringify(item));
+            indice = parseInt(message)-1;
+            var pedido = itensCardapio[indice];
+            itensPedidos.push(pedido);
+            server.publish(resultAddPedido, JSON.stringify(pedido));
             break;
         case listarPedidos:
             server.publish(resultListarPedido, JSON.stringify(itensPedidos));
             break;
         case excluirPedido:
+            var posicao = parseInt(message)-1;
+            var excluido = itensPedidos.splice(posicao,1);
+            server.publish(resultExcluirPedido, JSON.stringify(excluido));
             break;
         case finalizar:
+            server.publish(resultFinalizar, JSON.stringify(itensPedidos));
+            itensPedidos = [];
             break;
 
         case cancelar:
+            server.publish(resultCancelar, '');
+            itensPedidos = [];
             break;
 
         case ADMIN:

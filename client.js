@@ -27,6 +27,13 @@ const finalizar = 'finalizar';
 const resultAddPedido = 'result-add-pedido';
 const resultListarPedido = 'result-listar-pedido';
 const resultExcluirPedido = 'result-excluir-pedido';
+const resultFinalizar = 'result-finalizar'
+
+const ADMIN = 'admin';
+const resultAdmin = 'result-admin';
+
+const cancelar = 'cancelar';
+const resultCancelar = 'result-cancelar';
 
 // mensagens de menus
 const menu = "Bem-vido ao sFood!\n[V]Para Visualizar o Cardapio\n[P]Para Listar os Pedidos\n[A+IndiceProduto]Para Adicionar um Pedido\nExemplo: A4 (para add o BROTINHO)\n[B+IndiceProduto]Para Buscar Produto\n[E+IndicePedido]Para Excluir um Pedido\n[F]Para Finalizar\n[C]Para cancelar\n[X+Senha]Para Acessar o menu Administrativo (Senha: 123456)\nOu digite M a qualquer momento para ter acesso as opcões.\n"
@@ -62,24 +69,42 @@ client.on('connect', function(){
                     });
                     break;
                 case 'A': // realizar pedido [A + Indice do Item]
-                    client.subscribe(resultAddItem, function (err) {
+                    var indice = aux.slice(1);
+                    client.subscribe(resultAddPedido, function (err) {
                         if (!err) {
-                            const posicao = parseInt(aux.slice(1));
-                            client.publish()
+                            client.publish(addPedido, indice);
                         }
                     });
                     break;
                 case 'E': // excluir pedido [E + Indice do Pedido]
+                    indice = aux.slice(1);
+                    client.subscribe(resultExcluirPedido, function (err) {
+                        if (!err) {
+                            client.publish(excluirPedido, indice);
+                        }
+                    });
                     break;
                 case 'B': // busca item [B + Indice do Item]
-                    var indice = parseInt(aux.slice(1));
+                    indice = aux.slice(1);
                     client.subscribe(resultBuscarItem, function (err) {
-                        client.publish(buscarItem, indice);
+                        if (!err) {
+                            client.publish(buscarItem, indice);
+                        }
                     });
                     break;
                 case 'F': // finalizar
+                    client.subscribe(resultFinalizar, function (err) {
+                        if (!err) {
+                            client.publish(finalizar, '');
+                        }
+                    });
                     break;
                 case 'C': // cancelar compra ou processo
+                    client.subscribe(resultCancelar, function (err) {
+                        if (!err) {
+                            client.publish(cancelar, '');
+                        }
+                    });
                     break;
                 case 'X': // tentando entrar no menu Administrador
                     break;
@@ -121,14 +146,41 @@ client.on('connect', function(){
                 var aux = JSON.parse(message.toString());
                 for (var i = 0; i < aux.length; i++){
                     var item = (i+1) + '.' + aux[i].nome + ' - R$ ' + aux[i].preco + '\n';
-                    pedidos = cardapio + item;
+                    pedidos = pedidos + item;
                     total = total + aux[i].preco;
                 }
                 console.log('\n>>>> Os seus pedidos são:\n' +  pedidos + '\nValor total: ' + total + '\n');
                 break;
-            case resultBuscarItem:
+            case resultAddPedido:
                 var pedido = JSON.parse(message.toString());
+                console.log('\nPedido: ' + pedido.nome + ' no valor de R$ ' + pedido.preco + ' foi adicionado! :)\nMais alguma coisa? S2\n');
+                break;
+            case resultExcluirPedido:
+                pedido = JSON.parse(message.toString());
+                console.log('\nPedido: ' + pedido[0].nome + ' no valor de R$ ' + pedido[0].preco + ' foi excluido com sucesso! :\\\n');
+                break;
+            case resultBuscarItem:
+                pedido = JSON.parse(message.toString());
                 console.log('\nItem encontrado: ' + pedido.nome + ' no valor de R$ ' + pedido.preco + '\n');
+                break;
+            case resultFinalizar:
+                pedidos = '';
+                total = 0;
+                aux = JSON.parse(message.toString());
+                for (var i = 0; i < aux.length; i++){
+                    var item = (i+1) + '.' + aux[i].nome + ' - R$ ' + aux[i].preco + '\n';
+                    pedidos = pedidos + item;
+                    total = total + aux[i].preco;
+                }
+                console.log('\nOK! Compra finalizada! B)\n');
+                console.log('\n>>>> Os seus pedidos são:\n' +  pedidos + '\nValor total: ' + total + '\n');
+                client.end();
+                rl.close();
+                break;
+            case resultCancelar:
+                console.log('\nCompra cancelada! :*(\n');
+                client.end();
+                rl.close();
                 break;
         }
     });
