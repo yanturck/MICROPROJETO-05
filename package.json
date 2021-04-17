@@ -1,0 +1,17 @@
+{
+  "name": "microprojeto-05",
+  "version": "1.0.0",
+  "description": "Implementacao de um servico de lance usando mqtt",
+  "main": "client.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "client": "node client.js",
+    "server": "node server.js"
+  },
+  "author": "Yan Rocha Pimenta",
+  "license": "ISC",
+  "dependencies": {
+    "mqtt": "^4.2.6",
+    "readline": "^1.3.0"
+  }
+}
