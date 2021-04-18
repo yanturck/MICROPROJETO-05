@@ -116,8 +116,13 @@ server.on('message', function(topic, message) {
             break;
         case buscarItem:
             var indice = parseInt(message)-1;
-            item = itensCardapio[indice];
-            server.publish(resultBuscarItem, JSON.stringify(item));
+            
+            if (indice >= itensCardapio.length || indice === -1) {
+                server.publish(resultBuscarItem, 'error');
+            }else {
+                item = itensCardapio[indice];
+                server.publish(resultBuscarItem, JSON.stringify(item));
+            }
             break;
         case excluirItem:
             break;
@@ -125,23 +130,31 @@ server.on('message', function(topic, message) {
         // tópicos dos pedidos
         case addPedido:
             indice = parseInt(message)-1;
-            var pedido = itensCardapio[indice];
-            itensPedidos.push(pedido);
-            server.publish(resultAddPedido, JSON.stringify(pedido));
+            if (indice >= itensCardapio.length || indice === -1) {
+                server.publish(resultAddPedido, 'error');
+            }else {
+                var pedido = itensCardapio[indice];
+                itensPedidos.push(pedido);
+                server.publish(resultAddPedido, JSON.stringify(pedido));
+            }
             break;
         case listarPedidos:
             server.publish(resultListarPedido, JSON.stringify(itensPedidos));
             break;
         case excluirPedido:
             var posicao = parseInt(message)-1;
-            var excluido = itensPedidos.splice(posicao,1);
-            server.publish(resultExcluirPedido, JSON.stringify(excluido));
+
+            if (posicao >= itensPedidos.length || posicao === -1) {
+                server.publish(resultExcluirPedido, 'error');
+            }else {
+                var excluido = itensPedidos.splice(posicao,1);
+                server.publish(resultExcluirPedido, JSON.stringify(excluido));
+            }
             break;
         case finalizar:
             server.publish(resultFinalizar, JSON.stringify(itensPedidos));
             itensPedidos = [];
             break;
-
         case cancelar:
             server.publish(resultCancelar, '');
             itensPedidos = [];

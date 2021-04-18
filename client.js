@@ -152,16 +152,34 @@ client.on('connect', function(){
                 console.log('\n>>>> Os seus pedidos são:\n' +  pedidos + '\nValor total: ' + total + '\n');
                 break;
             case resultAddPedido:
-                var pedido = JSON.parse(message.toString());
-                console.log('\nPedido: ' + pedido.nome + ' no valor de R$ ' + pedido.preco + ' foi adicionado! :)\nMais alguma coisa? S2\n');
+                aux = message.toString();
+                
+                if (aux === 'error') {
+                    console.log('\nDesculpe! :*(\nItem não existe!\n');
+                }else {
+                    var pedido = JSON.parse(aux);
+                    console.log('\nPedido: ' + pedido.nome + ' no valor de R$ ' + pedido.preco + ' foi adicionado! :)\nMais alguma coisa? S2\n');
+                }
                 break;
             case resultExcluirPedido:
-                pedido = JSON.parse(message.toString());
-                console.log('\nPedido: ' + pedido[0].nome + ' no valor de R$ ' + pedido[0].preco + ' foi excluido com sucesso! :\\\n');
+                aux = message.toString();
+
+                if (aux === 'error') {
+                    console.log('\nDesculpe! :*(\nPedido não existe!\n');
+                }else {
+                    var excluido = JSON.parse(aux);
+                    console.log('\nPedido: ' + excluido[0].nome + ' no valor de R$ ' + excluido[0].preco + ' foi excluido com sucesso! :\\\n');
+                }
                 break;
             case resultBuscarItem:
-                pedido = JSON.parse(message.toString());
-                console.log('\nItem encontrado: ' + pedido.nome + ' no valor de R$ ' + pedido.preco + '\n');
+                aux = message.toString();
+
+                if (aux === 'error') {
+                    console.log('\nDesculpe! :*(\nItem não existe!\n');
+                }else {
+                    pedido = JSON.parse(aux);
+                    console.log('\nItem encontrado: ' + pedido.nome + ' no valor de R$ ' + pedido.preco + '\n');
+                }
                 break;
             case resultFinalizar:
                 pedidos = '';
