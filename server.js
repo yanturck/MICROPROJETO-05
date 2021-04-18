@@ -7,7 +7,6 @@ const listarCardapio = 'listar-cardapio';
 const excluirItem = 'excluir-item';
 const buscarItem = 'buscar-item';
 // topicos de resultados dos anteriores
-const resultAddItem = 'result-add-item';
 const resultListarCardapio = 'result-listar-cardapio';
 const resultExcluirItem = 'result-excluir-item';
 const resultBuscarItem = 'result-buscar-item';
@@ -107,16 +106,15 @@ server.on('connect', function(){
 server.on('message', function(topic, message) {
     switch(topic){
         // tópicos do cardapio
-        case addItem:
+        case addItem: // adicionando um Item ao Cardapio
             var item = JSON.parse(message);
             itensCardapio.push(item);
             break;
-        case listarCardapio:
+        case listarCardapio: // mostrando o Cardapio
             server.publish(resultListarCardapio, JSON.stringify(itensCardapio));
             break;
-        case buscarItem:
+        case buscarItem: // buscando um Item do Cradapio
             var indice = parseInt(message)-1;
-            
             if (indice >= itensCardapio.length || indice === -1) {
                 server.publish(resultBuscarItem, 'error');
             }else {
@@ -124,11 +122,17 @@ server.on('message', function(topic, message) {
                 server.publish(resultBuscarItem, JSON.stringify(item));
             }
             break;
-        case excluirItem:
+        case excluirItem: // excluindo um Item do Cardapio
+            indice = parseInt(message)-1;
+            if (indice >= itensCardapio.length || indice === -1) {
+                server.publish(resultExcluirItem, 'error');
+            }else {
+                var excluido = itensCardapio.splice(indice,1);
+                server.publish(resultExcluirItem, JSON.stringify(excluido))
+            }
             break;
-
         // tópicos dos pedidos
-        case addPedido:
+        case addPedido: // adicionando um Pedido
             indice = parseInt(message)-1;
             if (indice >= itensCardapio.length || indice === -1) {
                 server.publish(resultAddPedido, 'error');
@@ -138,29 +142,33 @@ server.on('message', function(topic, message) {
                 server.publish(resultAddPedido, JSON.stringify(pedido));
             }
             break;
-        case listarPedidos:
+        case listarPedidos: // mostrando os Pedidos
             server.publish(resultListarPedido, JSON.stringify(itensPedidos));
             break;
-        case excluirPedido:
-            var posicao = parseInt(message)-1;
-
-            if (posicao >= itensPedidos.length || posicao === -1) {
+        case excluirPedido: // excluindo um Pedido
+            indice = parseInt(message)-1;
+            if (indice >= itensPedidos.length || indice === -1) {
                 server.publish(resultExcluirPedido, 'error');
             }else {
-                var excluido = itensPedidos.splice(posicao,1);
+                excluido = itensPedidos.splice(indice,1);
                 server.publish(resultExcluirPedido, JSON.stringify(excluido));
             }
             break;
-        case finalizar:
+        case finalizar: // finalizando
             server.publish(resultFinalizar, JSON.stringify(itensPedidos));
             itensPedidos = [];
             break;
-        case cancelar:
+        case cancelar: // cancelando, serve para o Cliente e o Administrador
             server.publish(resultCancelar, '');
             itensPedidos = [];
             break;
-
-        case ADMIN:
+        case ADMIN: // verificando Senha
+            tmp = message.toString();
+            if (tmp === senha) {
+                server.publish(resultAdmin, 'true');
+            }else {
+                server.publish(resultAdmin, 'error');
+            }
             break;
     }
 });
