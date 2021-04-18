@@ -170,7 +170,7 @@ client.on('connect', function(){
                     break;
                 case 'D': // deletar item do cardapio [D + Indice do Item]
                     var posicao = parseInt(aux.slice(1));
-                    if (isNaN(indice)) { // indice não númerico
+                    if (isNaN(posicao)) { // indice não númerico
                         console.log('\nDesculpa! :\\\nComando não aceito!\n');
                     }else {
                         client.subscribe(resultExcluirItem, function (err) {
